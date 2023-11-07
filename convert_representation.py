@@ -1,4 +1,7 @@
+import igraph as ig
 from igraph import Graph
+
+from utils import is_tree_representation_correct, tree_structure_to_str
 
 # ================================================================================
 # 5. Funkcja (moduł) zamieniająca reprezentację nawiasową w drzewo i vice versa
@@ -8,17 +11,33 @@ def convert_parenthesized_to_tree(parenthesized: str) -> Graph:
     
     Args:
         parenthesized (str): Reprezentacja nawiasowa struktury RNA.
-    ValueError: Kiedy nie da sie przekonwertowac, bo struktura jest zla
-    
+    Raises:
+        ValueError: Kiedy nie da sie przekonwertowac, bo struktura nawiasów jest zla
     Returns:
-        Graph: Graf reprezentujący strukturę RNA.
+        Graph: Graf reprezentujący strukturę RNA. 
+        Struktura tego grafu jest opisana w README.md
     """
-    # TODO: treść funkcji
-    pass
+    g = ig.Graph(directed=True)
+    v = g.add_vertex(is_root=True, unpaired_count_0=0, unpaired_count_1=0, unpaired_count_2=0)
+    for c in parenthesized:
+        if c == ".":
+            v[f"unpaired_count_{v.outdegree()}"] += 1
+        if c == "(":
+            v_prev = v
+            v = g.add_vertex(is_root=False, unpaired_count_0=0, unpaired_count_1=0)
+            g.add_edge(v_prev, v)
+        if c == ")":
+            if (len(g.predecessors(v)) == 0):
+                raise ValueError("Wrong parenthasis structure")
+            v = g.vs[g.predecessors(v)[0]]
+    
+    return g
 
 def convert_tree_to_parenthesized(St: Graph) -> str:
     """
     Konwertuje graf reprezentujący strukturę RNA na reprezentację nawiasową.
+    Rozpoczyna konwersję od wierzchołka oznaczonego jako root 
+    własnością is_root=True.
     
     Args:
         St (Graph): Graf reprezentujący strukturę RNA.
@@ -26,5 +45,57 @@ def convert_tree_to_parenthesized(St: Graph) -> str:
     Returns:
         str: Reprezentacja nawiasowa struktury RNA.
     """
-    # TODO: treść funkcji
-    pass
+    return convert_subtree_to_parenthesized(St, St.vs.find(is_root=True).index)
+
+def convert_subtree_to_parenthesized(St: Graph, rootIdx: int) -> str:
+    """
+    Konwertuje graf reprezentujący strukturę RNA na reprezentację nawiasową.
+    
+    Args:
+        St (Graph): Graf reprezentujący strukturę RNA.
+        rootIdx (int): indeks od którego zaczniemy wypisywanie
+    Raises:
+    Returns:
+        str: Reprezentacja nawiasowa struktury RNA.
+    """
+    parenthesized = ""
+    v = St.vs[rootIdx]
+    parenthesized += "."*v[f"unpaired_count_0"]
+
+    vs_idx = St.successors(v)
+    i = 1
+    for v_idx in vs_idx:
+        parenthesized += "("
+        parenthesized += convert_subtree_to_parenthesized(St, v_idx)
+        parenthesized += ")"
+        parent = St.vs[v_idx].predecessors()[0]
+        parenthesized += "."*(0 if parent[f"unpaired_count_{i}"] is None else parent[f"unpaired_count_{i}"])
+        i += 1
+
+    return parenthesized
+
+if __name__ == "__main__":
+    print("Unit testy")
+
+    # Lista różnych reprezentacji nawiasowych drzew do przetestowania
+    data = [
+        "..(...).",        
+        "(..)",              # Proste drzewo binarne
+        "((.)..)",           # Drzewo binarne z jednym dzieckiem
+        "((..)(..))",        # Pełne drzewo binarne
+        "(((..).).)",        # Niesymetryczne drzewo binarne
+        ""                   # Puste drzewo
+    ]
+
+    # Pętla przechodząca przez wszystkie przykłady
+    for expected in data:
+        print(expected)
+        St = convert_parenthesized_to_tree(expected)
+        print("Po konwersji na drzewo:")
+        print(tree_structure_to_str(St))
+        actual = convert_tree_to_parenthesized(St)
+        print("Powrót do reprezentacji nawiasowej:", actual)
+        print("Czy reprezentacja jest poprawna:", is_tree_representation_correct(St))
+        print("\n")  # Dodanie pustej linii dla czytelności
+        assert expected == actual, f"Błąd w konwersji. Przed konwersją: {expected}, po konwersji tam i z powrotem: {actual}"
+
