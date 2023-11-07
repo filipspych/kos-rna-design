@@ -17,12 +17,12 @@ Ogólnie, chcemy zrobić narzędzie, które wesprze nasze teoretyczne rozważani
 
 1. **Obiekt drzewa struktury**: główny obiekt do przekazywania między strukturami. To będzie obiekt z biblioteki igraph. @Filip Spychała
 
-2. **Funkcja (moduł) oceniająca projektowalność**: Linki do prac opisujących algorytmy zostały podane w pracy 1, strona 2. Można również użyć czegoś stąd:
+2. **Funkcja (moduł) oceniająca projektowalność**: @Borys Kurdek Linki do prac opisujących algorytmy zostały podane w pracy 1, strona 2. Można również użyć czegoś stąd:
    - seqfold · PyPI: [https://pypi.org/project/seqfold/](https://pypi.org/project/seqfold/)
    - TBI - ViennaRNA Package 2, zwłaszcza metoda Wuchty et.al 1999: [https://www.tbi.univie.ac.at/RNA/](https://www.tbi.univie.ac.at/RNA/)
    - ViennaRNA Web Services: [http://rna.tbi.univie.ac.at/](http://rna.tbi.univie.ac.at/)
 
-3. **Funkcja (moduł) wyświetlający drzewo na ekranie**: @MO, polecam wzorować się na tym (gotowe rozwiązanie): [https://github.com/filipspych/pace-challange-BDS/blob/feature/PS_analysis/plot.py](https://github.com/filipspych/pace-challange-BDS/blob/feature/PS_analysis/plot.py)
+3. **Funkcja (moduł) wyświetlający drzewo na ekranie**: @Michal Oledzki, polecam wzorować się na tym (gotowe rozwiązanie): [https://github.com/filipspych/pace-challange-BDS/blob/feature/PS_analysis/plot.py](https://github.com/filipspych/pace-challange-BDS/blob/feature/PS_analysis/plot.py)
 
 4. **Funkcja (moduł) zamieniająca reprezentację nawiasową w drzewo i vice versa**: @Filip Spychała
 
