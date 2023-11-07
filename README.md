@@ -1,4 +1,4 @@
-# TO JES GAŁĄŹ MAIN
+# TO JEST GAŁĄŹ MAIN
 
 Przejdź na gałąź develop, żeby zobaczyć aktualne postępy pracy.
 
