@@ -54,4 +54,37 @@ def convert_tree_to_parenthesized(St: Graph) -> str:
         str: Reprezentacja nawiasowa struktury RNA.
     """
     # TODO: treść funkcji
-    pass
+    result: str = ""
+    stack = LifoQueue(maxsize=len(St.vs))
+    # first element is vertex number, second is vertex level in a tree
+    depth = -1
+
+    # init stack with root's children (not with root because root doesn't have parent we can skip)
+    neighbors = St.neighbors(0)
+    for indx in range(len(neighbors) - 1, -1, -1):
+        stack.put((neighbors[indx], depth + 1))
+
+    # DFS, adds vertex children to stack
+    while not stack.empty():
+        i = stack.get()
+
+        for d in range(depth - i[1] + 1):
+            result += ")"
+        depth = i[1]
+
+
+        if not St.vs[i[0]]["isPaired"]:
+            result += "."
+            depth -= 1
+            continue
+        result += "("
+
+        neighbors = St.neighbors(i[0])
+        for indx in range(len(neighbors) - 1, 0, -1):
+            stack.put((neighbors[indx], depth + 1))
+
+    for d in range(depth + 1):
+        result += ")"
+
+    return result
+    #return result[1:(len(result) - 1)]
