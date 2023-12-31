@@ -1,3 +1,4 @@
+from queue import LifoQueue
 import igraph as ig
 from igraph import Graph
 
@@ -80,6 +81,65 @@ def convert_subtree_to_parenthesized(St: Graph, rootIdx: int) -> str:
         i += 1
 
     return parenthesized
+
+def convert_parenthesized_to_naive_tree(parenthesized: str) -> Graph:
+    """
+    Konwertuje reprezentację nawiasową struktury RNA na naiwnie zbudowany graf,
+    gdzie niesparowane wierzchołki są reprezentowane jako wierzchołki w grafie 
+    (a nie jako liczba całkowita).
+    
+    Args:
+        parenthesized (str): Reprezentacja nawiasowa struktury RNA.
+    ValueError: Kiedy nie da sie przekonwertowac, bo struktura jest zla
+    
+    Returns:
+        Graph: Graf reprezentujący naiwnie strukturę RNA.
+    """
+    # TODO: treść funkcji
+    stack = LifoQueue(maxsize=len(parenthesized))
+    g: Graph
+    g = Graph()
+    g.add_vertex()
+    g.vs[0]["isPaired"] = True
+    i = 0
+    for char in parenthesized:
+        if char == '(':
+            stack.put(i)
+            g.add_vertex()
+            g.add_edge(i, g.vs.__len__() - 1)
+            i = g.vs.__len__() - 1
+            g.vs[i]["isPaired"] = True
+        elif char == ')':
+            if stack.empty():
+                raise Exception(f"Niepoprawna reprezentacja nawiasowa: nie otwarty nawias.")
+            i = stack.get()
+        else:
+            g.add_vertex()
+            g.add_edge(i, g.vs.__len__() - 1)
+            g.vs[g.vs.__len__() - 1]["isPaired"] = False
+    if stack.empty == False:
+        raise Exception(f"Niepoprawna reprezentacja nawiasowa: nie zamknięty nawias.")
+    db = g.vs[i]["isPaired"]
+    return g
+
+def convert_parenthesized_to_numberized(parenthesized: str) -> str:
+    """
+    Zamiast kropek wstawia liczby, które oznaczają ile kropek jest w grupie.
+    """
+    count = 0
+    result = ""
+    for char in parenthesized:
+        if char == '.':
+            count += 1
+        else:
+            if count > 0:
+                result += str(count)
+                count = 0
+            result += char
+    if count > 0:
+        result += str(count)
+    return result
+    
 
 if __name__ == "__main__":
     print("Unit testy")

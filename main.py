@@ -76,7 +76,7 @@ def __mode_1(g: Graph) -> None:
     """
     1 = Display the RNA structure as a graph
     """
-    show_drawing(g)
+    show_drawing(g, draw_unpaired=False, Sp=structure)
 
 def __mode_2(g: Graph) -> None:
     """
