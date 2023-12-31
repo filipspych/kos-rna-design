@@ -1,7 +1,7 @@
 import igraph as ig
 from igraph import Graph
 
-from utils import is_tree_representation_correct, tree_structure_to_str
+from utils import is_structure_with_known_ND_motifs, tree_structure_to_str
 
 # ================================================================================
 # 5. Funkcja (moduł) zamieniająca reprezentację nawiasową w drzewo i vice versa
@@ -19,19 +19,26 @@ def convert_parenthesized_to_tree(parenthesized: str) -> Graph:
     """
     g = ig.Graph(directed=True)
     v = g.add_vertex(is_root=True, unpaired_count_0=0, unpaired_count_1=0, unpaired_count_2=0)
+    opened_parentheses_count = 0
+
     for c in parenthesized:
         if c == ".":
-            v[f"unpaired_count_{v.outdegree()}"] += 1
+            v[f"unpaired_count_{v.outdegree()}"] = (v.attributes().get(f"unpaired_count_{v.outdegree()}") or 0) + 1
         if c == "(":
+            opened_parentheses_count += 1
             v_prev = v
             v = g.add_vertex(is_root=False, unpaired_count_0=0, unpaired_count_1=0)
             g.add_edge(v_prev, v)
         if c == ")":
+            opened_parentheses_count -= 1
             if (len(g.predecessors(v)) == 0):
-                raise ValueError("Wrong parenthasis structure")
+                raise ValueError("Unopened parenthesis")
             v = g.vs[g.predecessors(v)[0]]
     
+    if opened_parentheses_count != 0:
+        raise ValueError("Unclosed parenthesis")
     return g
+
 
 def convert_tree_to_parenthesized(St: Graph) -> str:
     """
@@ -69,7 +76,7 @@ def convert_subtree_to_parenthesized(St: Graph, rootIdx: int) -> str:
         parenthesized += convert_subtree_to_parenthesized(St, v_idx)
         parenthesized += ")"
         parent = St.vs[v_idx].predecessors()[0]
-        parenthesized += "."*(0 if parent[f"unpaired_count_{i}"] is None else parent[f"unpaired_count_{i}"])
+        parenthesized += "."*(parent.attributes().get(f"unpaired_count_{i}") or 0)
         i += 1
 
     return parenthesized
@@ -79,6 +86,7 @@ if __name__ == "__main__":
 
     # Lista różnych reprezentacji nawiasowych drzew do przetestowania
     data = [
+        "()()().",          
         "..(...).",        
         "(..)",              # Proste drzewo binarne
         "((.)..)",           # Drzewo binarne z jednym dzieckiem
@@ -95,7 +103,7 @@ if __name__ == "__main__":
         print(tree_structure_to_str(St))
         actual = convert_tree_to_parenthesized(St)
         print("Powrót do reprezentacji nawiasowej:", actual)
-        print("Czy reprezentacja jest poprawna:", is_tree_representation_correct(St))
+        print("Czy reprezentacja jest trywialnie ND:", is_structure_with_known_ND_motifs(St))
         print("\n")  # Dodanie pustej linii dla czytelności
         assert expected == actual, f"Błąd w konwersji. Przed konwersją: {expected}, po konwersji tam i z powrotem: {actual}"
 

@@ -15,4 +15,4 @@ def show_drawing(St: Graph, draw_unpaired: bool = True, Sp: str = "") -> None:
         Exception: Wyjątek rzucany, gdy nie można wyświetlić rysunku. TODO: Czy to sie moze zdarzy? Jezeli nie to zmodyfikowac dokum,entacje.
     """
     # TODO: treść funkcji
-    raise Exception("Komunikat o błędzie. Im bardziej szczegółowy, tym lepiej")
+    raise Exception("Nie zaimplementowano.")
