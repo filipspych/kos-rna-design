@@ -16,4 +16,4 @@ def decide_designable(St: Graph) -> bool:
         bool: True jeśli St jest projektowalna, False jeśli nie jest projektowalna.
     """
     # TODO: treść funkcji
-    raise Exception("Komunikat o błędzie. Im bardziej szczegółowy, tym lepiej")
+    raise Exception("Nie zaimplementowano.")
