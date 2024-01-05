@@ -134,12 +134,12 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
 
 
 def insert_string_at_indexes(main_string, insert_string, indexes):
-    main_list = list(main_string)
+    result_list = list(main_string)
 
     for index, char in zip(indexes, insert_string):
-        main_list[index] = char
+        result_list.insert(index, char)
 
-    result_string = ''.join(main_list)
+    result_string = ''.join(result_list)
     return result_string
 def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[int]) -> bool:
     # we create possible sequences by adding letters on dot_indexes
