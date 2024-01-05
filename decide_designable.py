@@ -10,7 +10,7 @@ import sys
 
 import numpy as np
 
-min_loop_length = 4
+min_loop_length = 0
 
 def pair_check(tup):
     if tup in [('A', 'U'), ('U', 'A'), ('C', 'G'), ('G', 'C')]:
@@ -141,6 +141,10 @@ def insert_string_at_indexes(main_string, insert_string, indexes):
 
     result_string = ''.join(result_list)
     return result_string
+
+def process_sequence(sequence: str) -> bool:
+    # function returns true if sequence has only one optimal structure -> structure is designable
+
 def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[int]) -> bool:
     # we create possible sequences by adding letters on dot_indexes
     letters = ['A','U','C','G']
@@ -149,7 +153,10 @@ def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[i
     for sequence in rna_sequences:
         for combination in combinations:
             whole_sequnce = insert_string_at_indexes(sequence,combination,dot_indexes)
+            # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
+            if process_sequence(whole_sequnce): return True
 
+    return False
 
 def decide_designable(St: str) -> bool:
     """
