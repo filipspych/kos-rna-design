@@ -17,64 +17,32 @@ def pair_check(tup):
         return True
     return False
 
-def OPT(i,j, sequence):
-    """
-    returns the score of the optimal pairing between indices i and j
-    """
-    #base case: no pairs allowed when i and j are less than 4 bases apart
-    if i >= j-min_loop_length:
-        return 0
-    else:
-        #i and j can either be paired or not be paired, if not paired then the optimal score is OPT(i,j-1)
-        unpaired = OPT(i, j-1, sequence)
+def add_tuples(tuple1, tuple2):
+    # Check if the input tuples have the same length
+    if len(tuple1) != len(tuple2):
+        raise ValueError("Input tuples must have the same length")
 
-        #check if j can be involved in a pairing with a position t
-        pairing = [1 + OPT(i, t-1, sequence) + OPT(t+1, j-1, sequence) for t in range(i, j-min_loop_length)\
-                   if pair_check((sequence[t], sequence[j]))]
-        if not pairing:
-            pairing = [0]
-        paired = max(pairing)
+    # Use a list comprehension to add corresponding elements
+    result_tuple = tuple(t1 + t2 for t1, t2 in zip(tuple1, tuple2))
+    return result_tuple
 
+def OPT_COUNT(i,j,sequence) -> (int, int):
+    if i >= j:
+        return (0, 1)
 
-        return max(unpaired, paired)
+    unpaired = OPT_COUNT(i,j-1,sequence) # (max,ilosc)
+    pairing = [add_tuples(add_tuples((1, 0), OPT_COUNT(i, t - 1, sequence)),OPT_COUNT(t + 1, j - 1, sequence)) for t in range(i, j) \
+               if pair_check((sequence[t], sequence[j]))]
+    if not pairing:
+        pairing = [(0,0)]
 
+    pairing.append(unpaired)
+    #print(pairing)
+    max_value = max(pairing, key=lambda x: x[0])[0]
+    count = sum(item[1] for item in pairing if item[0] == max_value)
 
-def traceback(i, j, structure, DP, sequence):
-    #in this case we've gone through the whole sequence. Nothing to do.
-    if j <= i:
-        return
-    #if j is unpaired, there will be no change in score when we take it out, so we just recurse to the next index
-    elif DP[i][j] == DP[i][j-1]:
-        traceback(i, j-1, structure, DP, sequence)
-    #consider cases where j forms a pair.
-    else:
-        #try pairing j with a matching index k to its left.
-        for k in [b for b in range(i, j-min_loop_length) if pair_check((sequence[b], sequence[j]))]:
-            #if the score at i,j is the result of adding 1 from pairing (j,k) and whatever score
-            #comes from the substructure to its left (i, k-1) and to its right (k+1, j-1)
-            if k-1 < 0:
-                print(DP)
-                print(i,j)
-               # print(k+)
-                if DP[i][j] == DP[k+1][j-1] + 1:
-                    structure.append((k,j))
-                    traceback(k+1, j-1, structure, DP, sequence)
-                    break
-                elif (i,j) == (j-1, k+1):
-                    structure.append((k,j))
-                    traceback(k + 1, j - 1, structure, DP, sequence)
-            elif DP[i][j] == DP[i][k-1] + DP[k+1][j-1] + 1:
-                #add the pair (j,k) to our list of pairs
-                structure.append((k,j))
-                #move the recursion to the two substructures formed by this pairing
-                traceback(i, k-1, structure, DP, sequence)
-                traceback(k+1, j-1, structure, DP, sequence)
-                break
-            elif (i,j) == (j-1, k+1):
-                structure.append((k,j))
-                traceback(i, k-1, structure, DP, sequence)
-                traceback(k+1, j-1, structure, DP, sequence)
-                break
+    return (max_value,count)
+
 
 def write_structure(sequence, structure):
     dot_bracket = ["." for _ in range(len(sequence))]
@@ -87,15 +55,15 @@ def write_structure(sequence, structure):
 #initialize matrix with zeros where can't have pairings
 def initialize(N):
     #NxN matrix that stores the scores of the optimal pairings.
-    DP = np.empty((N,N))
+    DP = np.empty((N,N),dtype=object)
     DP[:] = np.NAN
     for k in range(0, min_loop_length):
         for i in range(N-k):
             j = i + k
-            DP[i][j] = 0
+            DP[i][j] = (0, 0)
     return DP
 
-def nussinov(sequence):
+def nussinov(sequence,level:int):
     N = len(sequence)
     DP = initialize(N)
     structure = []
@@ -104,16 +72,28 @@ def nussinov(sequence):
     for k in range(min_loop_length, N):
         for i in range(N-k):
             j = i + k
-            DP[i][j] = OPT(i,j, sequence)
+            DP[i][j] = OPT_COUNT(i,j, sequence)
 
     #copy values to lower triangle to avoid null references
-    for i in range(N):
-        for j in range(0, i):
-            DP[i][j] = DP[j][i]
 
+    #for i in range(N):
+    #    for j in range(0, i):
+    #        DP[i][j] = DP[j][i]
 
-    traceback(0,N-1, structure, DP, sequence)
-    return (write_structure(sequence, structure), structure)
+ #  print(DP)
+    #max_value = np.max(DP)
+
+    # Count the occurrences of the maximum value
+    #count_max = np.count_nonzero(DP == max_value)
+   # print(count_max)
+   # if count_max == 2:
+   #     return True
+   #print(sequence)
+    if DP[0,N-1][1] == DP[0,N - 1][0] + 1 and DP[0,N-1][0] == level:
+       # print(sequence)
+        return True
+
+    return False
 
 def generate_sequence(g: Graph, v: int) -> list[str]:
 
@@ -142,6 +122,8 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
 
     return outputs
 
+def check_symmetric(a, tol=1e-8):
+    return np.all(np.abs(a-a.T) < tol)
 
 def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
     result_list = list(main_string)
@@ -154,11 +136,9 @@ def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
 
 def process_sequence(sequence: str) -> bool:
     # function returns true if sequence has only one optimal structure -> structure is designable
-    output_sequence = nussinov(sequence)
-    print(output_sequence)
-    return False
+
     raise Exception("nie zaimpelentowano")
-def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[int]) -> bool:
+def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[int],st_level: int) -> bool:
     # we create possible sequences by adding letters on dot_indexes
     letters = ['A','U','C','G']
     combinations = list(product(letters, repeat=dot_indexes.__len__()))
@@ -167,9 +147,13 @@ def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[i
         for combination in combinations:
             whole_sequnce = insert_string_at_indexes(sequence,combination,dot_indexes)
             # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
-            if process_sequence(whole_sequnce): return True
+            if nussinov(whole_sequnce,st_level):
+                return True
 
     return False
+
+if __name__ == "__main__":
+	print(nussinov(sys.argv[1]))
 
 def decide_designable(St: str) -> bool:
     """
@@ -188,6 +172,7 @@ def decide_designable(St: str) -> bool:
     #raise Exception("Nie zaimplementowano.")
     # find . indexes
     dot_indexes = [i for i, char in enumerate(St) if char == '.']
+    st_level = St.count('(')
     g = convert_parenthesized_to_tree(St)
     rna_sequences = generate_sequence(g, 0)
-    return check_designable(St, rna_sequences, dot_indexes)
+    return check_designable(St, rna_sequences, dot_indexes,st_level)
