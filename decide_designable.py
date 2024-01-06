@@ -53,14 +53,25 @@ def traceback(i, j, structure, DP, sequence):
             #if the score at i,j is the result of adding 1 from pairing (j,k) and whatever score
             #comes from the substructure to its left (i, k-1) and to its right (k+1, j-1)
             if k-1 < 0:
+                print(DP)
+                print(i,j)
+               # print(k+)
                 if DP[i][j] == DP[k+1][j-1] + 1:
                     structure.append((k,j))
                     traceback(k+1, j-1, structure, DP, sequence)
                     break
+                elif (i,j) == (j-1, k+1):
+                    structure.append((k,j))
+                    traceback(k + 1, j - 1, structure, DP, sequence)
             elif DP[i][j] == DP[i][k-1] + DP[k+1][j-1] + 1:
                 #add the pair (j,k) to our list of pairs
                 structure.append((k,j))
                 #move the recursion to the two substructures formed by this pairing
+                traceback(i, k-1, structure, DP, sequence)
+                traceback(k+1, j-1, structure, DP, sequence)
+                break
+            elif (i,j) == (j-1, k+1):
+                structure.append((k,j))
                 traceback(i, k-1, structure, DP, sequence)
                 traceback(k+1, j-1, structure, DP, sequence)
                 break
@@ -116,7 +127,6 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
     new_prev_outputs = []
     for u in g.neighbors(v, "out"):
         node_outputs = generate_sequence(g, u)
-        print(node_outputs)
         for prev_output in prev_outputs:
             for new_output in node_outputs:
                 new_prev_outputs.append(prev_output + new_output)
@@ -133,7 +143,7 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
     return outputs
 
 
-def insert_string_at_indexes(main_string, insert_string, indexes):
+def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
     result_list = list(main_string)
 
     for index, char in zip(indexes, insert_string):
@@ -144,7 +154,10 @@ def insert_string_at_indexes(main_string, insert_string, indexes):
 
 def process_sequence(sequence: str) -> bool:
     # function returns true if sequence has only one optimal structure -> structure is designable
-
+    output_sequence = nussinov(sequence)
+    print(output_sequence)
+    return False
+    raise Exception("nie zaimpelentowano")
 def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[int]) -> bool:
     # we create possible sequences by adding letters on dot_indexes
     letters = ['A','U','C','G']
@@ -177,4 +190,4 @@ def decide_designable(St: str) -> bool:
     dot_indexes = [i for i, char in enumerate(St) if char == '.']
     g = convert_parenthesized_to_tree(St)
     rna_sequences = generate_sequence(g, 0)
-    print(rna_sequences)
+    return check_designable(St, rna_sequences, dot_indexes)
