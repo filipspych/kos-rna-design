@@ -2,7 +2,7 @@ import sys
 from main import main
 from typing import Iterator, Tuple
 
-def find_mismatches(file_path: str) -> Iterator[Tuple[str, str, bool, bool]]:
+def batch_compare_designability(file_path: str) -> Iterator[Tuple[str, str, bool, bool]]:
     """
     Compare results of main.py for two structures in each line of file_path,
     returns all mismatches.
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python3 compare_designability.py <file_path>")
         sys.exit(1)
-    for structure1, structure2, result1, result2 in find_mismatches(sys.argv[1]):
+    for structure1, structure2, result1, result2 in batch_compare_designability(sys.argv[1]):
         print("================")
         print("MISMATCH")
         print()
