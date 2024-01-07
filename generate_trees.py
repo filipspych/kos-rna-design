@@ -82,11 +82,12 @@ def generate_tree(n: int) -> Graph:
 
         child_amount = node_paired + node_unpaired
         n -= node_paired * 2 + node_unpaired
+        print(node_paired, node_unpaired)
         print(n)
         pair_indexes = random.sample(range(0, child_amount), node_paired)
         pair_indexes.sort()
         process_pairs(g,pair_indexes,stack,node_paired,node_unpaired,v.index)
-        if len(stack) == 0 and n > 0:
+        if len(stack) == 0 and n + node_unpaired > 0:
             v["unpaired_count_0"] = n + node_unpaired
 
     return g
