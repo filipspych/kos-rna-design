@@ -6,6 +6,9 @@ from convert_representation import convert_parenthesized_to_tree
 from decide_designable import decide_designable
 from show_drawing import show_drawing
 from utils import is_structure_with_known_ND_motifs
+from results_cache import save_result_to_file, read_result_from_file, RESULTS_CACHE_PATH
+
+results_cache_enabled_arg = True
 
 # ================================================================================
 # 4. UI/obsługa plus spięcie tego w całość
@@ -59,19 +62,32 @@ def __mode_0(g: Graph) -> bool:
     'WRONG STRUCTURE' if the structure is incorrect. 
     Second line: details if available.
     """
+    if results_cache_enabled_arg:
+        result = read_result_from_file(structure)
+        if result is not None:
+            is_designable, rna_str = result
+            if is_designable:
+                print("D")
+                print(rna_str)
+            else:
+                print("ND")
+            return result
+
     contains_ND_motifs, which_motif = is_structure_with_known_ND_motifs(g)
     if contains_ND_motifs:
         print("ND")
         print(which_motif)
         return False
 
-    designable, strlist = decide_designable(structure)
+    designable, rna_str = decide_designable(structure)
     if designable:
         print("D")
-        print(strlist)
+        save_result_to_file(True, structure, rna_str)
+        print(rna_str)
         return True
     else:
         print("ND")
+        save_result_to_file(False, structure, "")
         return False
 
 def __mode_1(g: Graph) -> None:
@@ -102,10 +118,8 @@ def __mode_4(g: Graph) -> None:
     if not __mode_0(g):
         __mode_1(g)
 
-
-
 def usage():
-    print("Usage: python3 main.py <mode> '<structure>'")
+    print("Usage: python3 main.py <mode> '<structure>' <results_cache_enabled>")
     print("       <mode> should be an integer between 0 and 4, where:")
     print("       0 = Decide if the structure is designable. Will print exactly one or exactly two lines. First line: 'D' for designable, 'ND' for not designable, 'WRONG STRUCTURE' if the structure is incorrect. Second line: details if available.")
     print("       1 = Display the RNA structure as a graph")
@@ -113,10 +127,11 @@ def usage():
     print("       3 = Check if the RNA structure is designable and display it if it is")
     print("       4 = Check if the RNA structure is designable and display it if it is not")
     print("       <structure> is the parenthesized representation of the RNA structure to analyze.")
+    print("       <results_cache_enabled> is an int value indicating whether to use the results cache file (default: 1). If 0, the program will not use the results cache file. The cache file is at " + RESULTS_CACHE_PATH + ".")
     sys.exit(1)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if not 3 <= len(sys.argv) <= 4:
         usage()
     mode = int(sys.argv[1])
     if mode < 0 or mode > 4:
@@ -126,5 +141,7 @@ if __name__ == "__main__":
     if any(char not in ".()" for char in structure):
         print("Structure must be a string containing only '.' and '(', ')'.\n")
         usage()
+    if len(sys.argv) == 4:
+        results_cache_enabled_arg = sys.argv[3] != "0"
 
     main(mode, structure)

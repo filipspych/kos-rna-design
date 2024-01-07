@@ -1,0 +1,3 @@
+(..)(..)(..) False 
+(..)(.) True ACCUUCA
+(..)(..) True ACCUUCCA
