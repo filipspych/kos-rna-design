@@ -6,8 +6,8 @@ from convert_representation import convert_parenthesized_to_tree
 from decide_designable import decide_designable
 from show_drawing import show_drawing
 from utils import is_structure_with_known_ND_motifs
+from results_cache import save_result_to_file, read_result_from_file, RESULTS_CACHE_PATH
 
-RESULTS_CACHE_PATH = "./results_cache.txt"
 results_cache_enabled_arg = True
 
 # ================================================================================
@@ -65,9 +65,10 @@ def __mode_0(g: Graph) -> bool:
     if results_cache_enabled_arg:
         result = read_result_from_file(structure)
         if result is not None:
-            if result[0]:
+            is_designable, rna_str = result
+            if is_designable:
                 print("D")
-                print(result[1])
+                print(rna_str)
             else:
                 print("ND")
             return result
@@ -116,43 +117,6 @@ def __mode_4(g: Graph) -> None:
     """
     if not __mode_0(g):
         __mode_1(g)
-
-def save_result_to_file(result: bool, structure: str, rna_str: str) -> None:
-    """
-    Zapisuje wynik analizy struktury RNA do pliku.
-    
-    Args:
-        result (bool): True jeśli struktura jest projektowalna, False jeśli nie.
-        structure (str): Reprezentacja nawiasowa struktury RNA.
-        rna_str (str): Znalezione RNA foldujące się optymalnie do struktury (jeżeli struktura ND, to ten parametr powinien mieć wartość "").
-    """
-    with open(RESULTS_CACHE_PATH, "a") as f:
-        f.write(f"{structure} {result} {rna_str}\n")
-
-def read_result_from_file(structure: str) -> (bool, str):
-    """
-    Odczytuje wynik analizy struktury RNA z pliku. 
-    Jeśli brak jest pliku lub brak jest wyniku dla danej struktury, zwraca None.
-    
-    Args:
-        structure (str): Reprezentacja nawiasowa struktury RNA.
-    Returns:
-        bool: True jeśli struktura jest projektowalna, False jeśli nie.
-        str: Znalezione RNA foldujące się optymalnie do struktury (jeżeli struktura ND, to ten parametr ma wartość "").
-    """
-    try:
-        with open(RESULTS_CACHE_PATH, "r") as f:
-            for line in f:
-                if line.startswith(structure+" "):
-                    if line.split(" ")[1].strip() == "True":
-                        return (True, line.split(" ")[2].strip())
-                    else:
-                        print("deb " +line.split(" ")[1].strip())
-                        return (False, "")
-    except FileNotFoundError:
-        return None
-
-    return None
 
 def usage():
     print("Usage: python3 main.py <mode> '<structure>' <results_cache_enabled>")
