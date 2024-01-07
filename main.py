@@ -7,6 +7,9 @@ from decide_designable import decide_designable
 from show_drawing import show_drawing
 from utils import is_structure_with_known_ND_motifs
 
+RESULTS_CACHE_PATH = "./results_cache.txt"
+results_cache_enabled_arg = True
+
 # ================================================================================
 # 4. UI/obsługa plus spięcie tego w całość
 # Na razie UI jest takie, że uruchamiamy program z dwoma argumentami:
@@ -59,6 +62,15 @@ def __mode_0(g: Graph) -> bool:
     'WRONG STRUCTURE' if the structure is incorrect. 
     Second line: details if available.
     """
+    if results_cache_enabled_arg:
+        result = read_result_from_file(structure)
+        if result is not None:
+            if result:
+                print("D")
+            else:
+                print("ND")
+            return result
+
     contains_ND_motifs, which_motif = is_structure_with_known_ND_motifs(g)
     if contains_ND_motifs:
         print("ND")
@@ -67,9 +79,11 @@ def __mode_0(g: Graph) -> bool:
 
     if decide_designable(structure):
         print("D")
+        save_result_to_file(True, structure)
         return True
     else:
         print("ND")
+        save_result_to_file(False, structure)
         return False
 
 def __mode_1(g: Graph) -> None:
@@ -100,10 +114,39 @@ def __mode_4(g: Graph) -> None:
     if not __mode_0(g):
         __mode_1(g)
 
+def save_result_to_file(result: bool, structure: str) -> None:
+    """
+    Zapisuje wynik analizy struktury RNA do pliku.
+    
+    Args:
+        result (bool): True jeśli struktura jest projektowalna, False jeśli nie.
+        structure (str): Reprezentacja nawiasowa struktury RNA.
+    """
+    with open(RESULTS_CACHE_PATH, "a") as f:
+        f.write(f"{structure} {result}\n")
 
+def read_result_from_file(structure: str) -> bool:
+    """
+    Odczytuje wynik analizy struktury RNA z pliku. 
+    Jeśli brak jest pliku lub brak jest wyniku dla danej struktury, zwraca None.
+    
+    Args:
+        structure (str): Reprezentacja nawiasowa struktury RNA.
+    Returns:
+        bool: True jeśli struktura jest projektowalna, False jeśli nie.
+    """
+    try:
+        with open(RESULTS_CACHE_PATH, "r") as f:
+            for line in f:
+                if line.startswith(structure):
+                    return line.split(" ")[1].strip() == "True"
+    except FileNotFoundError:
+        return None
+
+    return None
 
 def usage():
-    print("Usage: python3 main.py <mode> '<structure>'")
+    print("Usage: python3 main.py <mode> '<structure>' <results_cache_enabled>")
     print("       <mode> should be an integer between 0 and 4, where:")
     print("       0 = Decide if the structure is designable. Will print exactly one or exactly two lines. First line: 'D' for designable, 'ND' for not designable, 'WRONG STRUCTURE' if the structure is incorrect. Second line: details if available.")
     print("       1 = Display the RNA structure as a graph")
@@ -111,10 +154,11 @@ def usage():
     print("       3 = Check if the RNA structure is designable and display it if it is")
     print("       4 = Check if the RNA structure is designable and display it if it is not")
     print("       <structure> is the parenthesized representation of the RNA structure to analyze.")
+    print("       <results_cache_enabled> is an int value indicating whether to use the results cache file (default: 1). If 0, the program will not use the results cache file. The cache file is at " + RESULTS_CACHE_PATH + ".")
     sys.exit(1)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if not 3 <= len(sys.argv) <= 4:
         usage()
     mode = int(sys.argv[1])
     if mode < 0 or mode > 4:
@@ -124,5 +168,7 @@ if __name__ == "__main__":
     if any(char not in ".()" for char in structure):
         print("Structure must be a string containing only '.' and '(', ')'.\n")
         usage()
+    if len(sys.argv) == 4:
+        results_cache_enabled_arg = sys.argv[3] != "0"
 
     main(mode, structure)

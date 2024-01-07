@@ -139,7 +139,7 @@ def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[i
                 return True
 
     return False
-    return False
+
 def decide_designable(St: str) -> bool:
     """
     Ocenić, czy struktura RNA reprezentowana przez graf St jest projektowalna. TODO: tutaj dodac dodatkowe info, ktore moze byc przydatne dla uzytkownikow tej funkcji
