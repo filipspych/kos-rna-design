@@ -77,9 +77,11 @@ def __mode_0(g: Graph) -> bool:
         print(which_motif)
         return False
 
-    if decide_designable(structure):
+    designable, strlist = decide_designable(structure)
+    if designable:
         print("D")
         save_result_to_file(True, structure)
+        print(strlist)
         return True
     else:
         print("ND")

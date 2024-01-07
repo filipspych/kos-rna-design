@@ -125,9 +125,11 @@ def process_sequence(sequence: str) -> bool:
     # function returns true if sequence has only one optimal structure -> structure is designable
 
     raise Exception("nie zaimpelentowano")
-def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[int],st_level: int) -> bool:
+
+
+def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list[int], st_level: int) -> (bool, str):
     # we create possible sequences by adding letters on dot_indexes
-    letters = ['A','U','C','G']
+    letters = ['A', 'U', 'C', 'G']
     combinations = list(product(letters, repeat=dot_indexes.__len__()))
 
     for sequence in rna_sequences:
@@ -136,11 +138,12 @@ def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[i
             whole_sequence = insert_string_at_indexes(sequence, combination, dot_indexes)
             # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
             if nussinov(whole_sequence, st_level):
-                return True
+                return True, whole_sequence
 
-    return False
+    return False, ""
 
-def decide_designable(St: str) -> bool:
+
+def decide_designable(St: str) -> (bool, str):
     """
     Ocenić, czy struktura RNA reprezentowana przez graf St jest projektowalna. TODO: tutaj dodac dodatkowe info, ktore moze byc przydatne dla uzytkownikow tej funkcji
     
@@ -160,4 +163,4 @@ def decide_designable(St: str) -> bool:
     st_level = St.count('(')
     g = convert_parenthesized_to_tree(St)
     rna_sequences = generate_sequence(g, 0)
-    return check_designable(St, rna_sequences, dot_indexes,st_level)
+    return check_designable(St, rna_sequences, dot_indexes, st_level)
