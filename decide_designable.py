@@ -46,15 +46,6 @@ def OPT_COUNT(i,j,sequence) -> (int, int):
     memo[(i,j)] = result
     return result
 
-
-def write_structure(sequence, structure):
-    dot_bracket = ["." for _ in range(len(sequence))]
-    for s in structure:
-        dot_bracket[min(s)] = "("
-        dot_bracket[max(s)] = ")"
-    return "".join(dot_bracket)
-
-
 #initialize matrix with zeros where can't have pairings
 def initialize(N):
     #NxN matrix that stores the scores of the optimal pairings.
