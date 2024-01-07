@@ -26,22 +26,25 @@ def add_tuples(tuple1, tuple2):
     result_tuple = tuple(t1 + t2 for t1, t2 in zip(tuple1, tuple2))
     return result_tuple
 
+memo = {}
 def OPT_COUNT(i,j,sequence) -> (int, int):
+    if (i, j) in memo:
+        return memo[(i, j)]
     if i >= j:
         return (0, 1)
 
-    unpaired = OPT_COUNT(i,j-1,sequence) # (max,ilosc)
-    pairing = [add_tuples(add_tuples((1, 0), OPT_COUNT(i, t - 1, sequence)),OPT_COUNT(t + 1, j - 1, sequence)) for t in range(i, j) \
+    unpaired = OPT_COUNT(i, j-1, sequence) # (max,ilosc)
+    pairing = [add_tuples(add_tuples((1, 0), OPT_COUNT(i, t - 1, sequence)), OPT_COUNT(t + 1, j - 1, sequence)) for t in range(i, j) \
                if pair_check((sequence[t], sequence[j]))]
     if not pairing:
         pairing = [(0,0)]
 
     pairing.append(unpaired)
-    #print(pairing)
     max_value = max(pairing, key=lambda x: x[0])[0]
     count = sum(item[1] for item in pairing if item[0] == max_value)
-
-    return (max_value,count)
+    result = (max_value, count)
+    memo[(i,j)] = result
+    return result
 
 
 def write_structure(sequence, structure):
@@ -74,23 +77,7 @@ def nussinov(sequence,level:int):
             j = i + k
             DP[i][j] = OPT_COUNT(i,j, sequence)
 
-    #copy values to lower triangle to avoid null references
-
-    #for i in range(N):
-    #    for j in range(0, i):
-    #        DP[i][j] = DP[j][i]
-
- #  print(DP)
-    #max_value = np.max(DP)
-
-    # Count the occurrences of the maximum value
-    #count_max = np.count_nonzero(DP == max_value)
-   # print(count_max)
-   # if count_max == 2:
-   #     return True
-   #print(sequence)
     if DP[0,N-1][1] == DP[0,N - 1][0] + 1 and DP[0,N-1][0] == level:
-       # print(sequence)
         return True
 
     return False
@@ -145,16 +132,14 @@ def check_designable(structure: str,rna_sequences: list[str],dot_indexes: list[i
 
     for sequence in rna_sequences:
         for combination in combinations:
-            whole_sequnce = insert_string_at_indexes(sequence,combination,dot_indexes)
+            memo.clear()
+            whole_sequence = insert_string_at_indexes(sequence, combination, dot_indexes)
             # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
-            if nussinov(whole_sequnce,st_level):
+            if nussinov(whole_sequence, st_level):
                 return True
 
     return False
-
-if __name__ == "__main__":
-	print(nussinov(sys.argv[1]))
-
+    return False
 def decide_designable(St: str) -> bool:
     """
     Ocenić, czy struktura RNA reprezentowana przez graf St jest projektowalna. TODO: tutaj dodac dodatkowe info, ktore moze byc przydatne dla uzytkownikow tej funkcji
