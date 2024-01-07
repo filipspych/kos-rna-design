@@ -87,7 +87,7 @@ def generate_tree(n: int) -> Graph:
         pair_indexes.sort()
         process_pairs(g,pair_indexes,stack,node_paired,node_unpaired,v.index)
         if len(stack) == 0 and n > 0:
-            v["unpaired_count_0"] = n
+            v["unpaired_count_0"] = n + node_unpaired
 
     return g
 
@@ -98,4 +98,4 @@ def generate_trees(amount: int, path: str):
 if __name__ == "__main__":
     g = generate_tree(10)
     struct = convert_representation.convert_tree_to_parenthesized(g)
-    print(struct)
+    print(struct,len(struct))
