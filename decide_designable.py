@@ -122,8 +122,9 @@ def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list
     letters = ['A', 'U', 'C', 'G']
     print_if(f"[{datetime.datetime.now()}] Generating combinations for unpaired bases...", should_print_progress)
     combinations = list(product(letters, repeat=dot_indexes.__len__()))
-    print_if("\n", should_print_progress)
 
+    print_if(f"\nRNAs checking started at {datetime.datetime.now()}\n", should_print_progress)
+    s_idx: int = 0
     for sequence in rna_sequences:
         for combination in combinations:
             memo.clear()
@@ -131,7 +132,8 @@ def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list
             # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
             if nussinov(whole_sequence, st_level):
                 return True, whole_sequence
-        print_progress("Checking RNAs", rna_sequences.index(sequence), len(rna_sequences), should_print_progress, should_print_in_one_line=True)
+        print_progress("Checking RNAs", s_idx, len(rna_sequences), should_print_progress, should_print_in_one_line=True)
+        s_idx+=1
 
     return False, ""
 
