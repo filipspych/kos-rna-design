@@ -4,3 +4,6 @@
 ...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
 ...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
 ...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
+..(..).. True CCACCUCC
+.(.). True CACUC
+...(..)... True CCCACCUCCC

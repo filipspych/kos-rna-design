@@ -16,3 +16,7 @@ def tree_structure_to_str(St: Graph) -> str:
         for attr in v.attributes():
             ret += f"  {attr}: {v[attr]}" + "\n"
     return ret
+
+def print_if(s: str, condition: bool) -> None:
+    if condition:
+        print(s)
