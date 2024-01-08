@@ -15,8 +15,6 @@ from utils import print_if, print_progress
 
 min_loop_length = 0
 
-PRINT_PROGRESS_VERBOSITY = 5000
-
 def pair_check(tup):
     if tup in [('A', 'U'), ('U', 'A'), ('C', 'G'), ('G', 'C')]:
         return True
