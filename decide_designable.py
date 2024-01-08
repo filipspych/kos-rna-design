@@ -1,3 +1,4 @@
+import datetime
 from igraph import Graph
 from itertools import product
 
@@ -9,6 +10,8 @@ from convert_representation import convert_parenthesized_to_tree
 import sys
 
 import numpy as np
+
+from utils import print_if, print_progress
 
 min_loop_length = 0
 
@@ -73,7 +76,7 @@ def nussinov(sequence,level:int):
 
     return False
 
-def generate_sequence(g: Graph, v: int) -> list[str]:
+def generate_sequence(g: Graph, v: int, should_print_progress: bool) -> list[str]:
 
     if g.neighborhood_size(v, 1, "out") == 1:
         return ["AU", "UA", "CG", "GC"]
@@ -84,7 +87,7 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
     pairs = [("A", "U"), ("U", "A"), ("C", "G"), ("G", "C")]
     new_prev_outputs = []
     for u in g.neighbors(v, "out"):
-        node_outputs = generate_sequence(g, u)
+        node_outputs = generate_sequence(g, u, should_print_progress)
         for prev_output in prev_outputs:
             for new_output in node_outputs:
                 new_prev_outputs.append(prev_output + new_output)
@@ -93,11 +96,13 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
 
         new_prev_outputs = []
     if v == 0:
+        print_progress("Generating RNAs", len(prev_outputs), 4**(g.vcount()-1), should_print_progress)
         return prev_outputs
     for p in pairs:
         for output in prev_outputs:
             outputs.append(p[0] + output + p[1])
 
+    print_progress("Generating RNAs", len(outputs), 4**(g.vcount()-1), should_print_progress)
     return outputs
 
 def check_symmetric(a, tol=1e-8):
@@ -112,17 +117,14 @@ def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
     result_string = ''.join(result_list)
     return result_string
 
-def process_sequence(sequence: str) -> bool:
-    # function returns true if sequence has only one optimal structure -> structure is designable
-
-    raise Exception("nie zaimpelentowano")
-
-
-def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list[int], st_level: int) -> (bool, str):
+def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list[int], st_level: int, should_print_progress: bool) -> (bool, str):
     # we create possible sequences by adding letters on dot_indexes
     letters = ['A', 'U', 'C', 'G']
+    print_if(f"[{datetime.datetime.now()}] Generating combinations for unpaired bases...", should_print_progress)
     combinations = list(product(letters, repeat=dot_indexes.__len__()))
 
+    print_if(f"\nRNAs checking started at {datetime.datetime.now()}\n", should_print_progress)
+    s_idx: int = 0
     for sequence in rna_sequences:
         for combination in combinations:
             memo.clear()
@@ -130,11 +132,13 @@ def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list
             # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
             if nussinov(whole_sequence, st_level):
                 return True, whole_sequence
+        print_progress("Checking RNAs", s_idx, len(rna_sequences), should_print_progress, should_print_in_one_line=True)
+        s_idx+=1
 
     return False, ""
 
 
-def decide_designable(St: str) -> (bool, str):
+def decide_designable(St: str, should_print_progress: bool) -> (bool, str):
     """
     Ocenić, czy struktura RNA reprezentowana przez graf St jest projektowalna. TODO: tutaj dodac dodatkowe info, ktore moze byc przydatne dla uzytkownikow tej funkcji
     
@@ -153,5 +157,6 @@ def decide_designable(St: str) -> (bool, str):
     dot_indexes = [i for i, char in enumerate(St) if char == '.']
     st_level = St.count('(')
     g = convert_parenthesized_to_tree(St)
-    rna_sequences = generate_sequence(g, 0)
-    return check_designable(St, rna_sequences, dot_indexes, st_level)
+    rna_sequences = generate_sequence(g, 0, should_print_progress)
+    print_if("", should_print_progress)
+    return check_designable(St, rna_sequences, dot_indexes, st_level, should_print_progress)

@@ -5,3 +5,6 @@
 ..(..).. True CCACCUCC
 .(.). True CACUC
 ...(..)... True CCCACCUCCC
+(((((((()))))))) True AAAAAAAAUUUUUUUU
+(((((((((()))))))))) True AAAAAAAAAAUUUUUUUUUU
+((((((((((((())))))))))))) True AAAAAAAAAAAAAUUUUUUUUUUUUU
