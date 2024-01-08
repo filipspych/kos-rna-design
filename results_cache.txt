@@ -2,8 +2,6 @@
 (..)(.) True ACCUUCA
 (..)(..) True ACCUUCCA
 ...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
-...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
-...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
 ..(..).. True CCACCUCC
 .(.). True CACUC
 ...(..)... True CCCACCUCCC
