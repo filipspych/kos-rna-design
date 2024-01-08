@@ -1,3 +1,6 @@
 (..)(..)(..) False 
 (..)(.) True ACCUUCA
 (..)(..) True ACCUUCCA
+...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
+...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
+...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
