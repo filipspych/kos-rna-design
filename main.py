@@ -8,9 +8,9 @@ from show_drawing import show_drawing
 from utils import is_structure_with_known_ND_motifs, print_if
 from results_cache import save_result_to_file, read_result_from_file, RESULTS_CACHE_PATH
 
-save_to_cache_enabled = True
-read_from_cache_enabled = True
-should_print_progress = False
+save_to_cache_enabled_arg = True
+read_from_cache_enabled_arg = True
+should_print_progress_arg = False
 
 # ================================================================================
 # 4. UI/obsługa plus spięcie tego w całość
@@ -75,7 +75,7 @@ def __mode_0(g: Graph, structure: str, verbose: bool) -> (bool, str):
         return False
     
 
-    if read_from_cache_enabled:
+    if read_from_cache_enabled_arg:
         result = read_result_from_file(structure)
         if result is not None:
             is_designable, rna_str = result
@@ -86,9 +86,9 @@ def __mode_0(g: Graph, structure: str, verbose: bool) -> (bool, str):
                 print_if("ND", verbose)
             return result[0]
 
-    designable, rna_str = decide_designable(structure, should_print_progress)
+    designable, rna_str = decide_designable(structure, should_print_progress_arg)
     print_if(f"D\n{rna_str}" if designable else "ND", verbose)
-    if save_to_cache_enabled:
+    if save_to_cache_enabled_arg:
         save_result_to_file(designable, structure, rna_str)
     return designable
 
@@ -148,21 +148,21 @@ if __name__ == "__main__":
         #0: cache disabled; 1: read and write; 2: write only; 3: read only
         cache_mode = int(sys.argv[3])
         if cache_mode == 0:
-            save_to_cache_enabled = False
-            read_from_cache_enabled = False
+            save_to_cache_enabled_arg = False
+            read_from_cache_enabled_arg = False
         elif cache_mode == 1:
-            save_to_cache_enabled = True
-            read_from_cache_enabled = True
+            save_to_cache_enabled_arg = True
+            read_from_cache_enabled_arg = True
         elif cache_mode == 2:
-            save_to_cache_enabled = True
-            read_from_cache_enabled = False
+            save_to_cache_enabled_arg = True
+            read_from_cache_enabled_arg = False
         elif cache_mode == 3:
-            save_to_cache_enabled = False
-            read_from_cache_enabled = True
+            save_to_cache_enabled_arg = False
+            read_from_cache_enabled_arg = True
         else:
             print("Cache mode must be an integer between 0 and 3.\n")
             usage()
     if len(sys.argv) == 5:
-        should_print_progress = bool(int(sys.argv[4]))
+        should_print_progress_arg = bool(int(sys.argv[4]))
 
     main(mode, structure, True)
