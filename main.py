@@ -8,7 +8,8 @@ from show_drawing import show_drawing
 from utils import is_structure_with_known_ND_motifs, print_if
 from results_cache import save_result_to_file, read_result_from_file, RESULTS_CACHE_PATH
 
-results_cache_enabled_arg = True
+save_to_cache_enabled = True
+read_from_cache_enabled = True
 
 # ================================================================================
 # 4. UI/obsługa plus spięcie tego w całość
@@ -73,7 +74,7 @@ def __mode_0(g: Graph, structure: str, verbose: bool) -> (bool, str):
         return False
     
 
-    if results_cache_enabled_arg:
+    if read_from_cache_enabled:
         result = read_result_from_file(structure)
         if result is not None:
             is_designable, rna_str = result
@@ -85,15 +86,10 @@ def __mode_0(g: Graph, structure: str, verbose: bool) -> (bool, str):
             return result[0]
 
     designable, rna_str = decide_designable(structure)
-    if designable:
-        print_if("D", verbose)
-        save_result_to_file(True, structure, rna_str)
-        print_if(rna_str, verbose)
-        return True
-    else:
-        print_if("ND", verbose)
-        save_result_to_file(False, structure, "")
-        return False
+    print_if(f"D\n{rna_str}" if designable else "ND", verbose)
+    if save_to_cache_enabled:
+        save_result_to_file(designable, structure, rna_str)
+    return designable
 
 def __mode_1(g: Graph) -> None:
     """
@@ -124,7 +120,7 @@ def __mode_4(g: Graph, verbose) -> None:
         __mode_1(g)
 
 def usage():
-    print("Usage: python3 main.py <mode> '<structure>' <results_cache_enabled>")
+    print("Usage: python3 main.py <mode> '<structure>' <cache_mode>")
     print("       <mode> should be an integer between 0 and 4, where:")
     print("       0 = Decide if the structure is designable. Will print exactly one or exactly two lines. First line: 'D' for designable, 'ND' for not designable, 'WRONG STRUCTURE' if the structure is incorrect. Second line: details if available.")
     print("       1 = Display the RNA structure as a graph")
@@ -132,7 +128,7 @@ def usage():
     print("       3 = Check if the RNA structure is designable and display it if it is")
     print("       4 = Check if the RNA structure is designable and display it if it is not")
     print("       <structure> is the parenthesized representation of the RNA structure to analyze.")
-    print("       <results_cache_enabled> is an int value indicating whether to use the results cache file (default: 1). If 0, the program will not use the results cache file. The cache file is at " + RESULTS_CACHE_PATH + ".")
+    print("       <cache_mode> (default: 1). 0: cache disabled; 1: read and write; 2: write only; 3: read only. The cache file is at " + RESULTS_CACHE_PATH + ".")
     sys.exit(1)
 
 if __name__ == "__main__":
@@ -147,6 +143,22 @@ if __name__ == "__main__":
         print("Structure must be a string containing only '.' and '(', ')'.\n")
         usage()
     if len(sys.argv) == 4:
-        results_cache_enabled_arg = sys.argv[3] != "0"
+        #0: cache disabled; 1: read and write; 2: write only; 3: read only
+        cache_mode = int(sys.argv[3])
+        if cache_mode == 0:
+            save_to_cache_enabled = False
+            read_from_cache_enabled = False
+        elif cache_mode == 1:
+            save_to_cache_enabled = True
+            read_from_cache_enabled = True
+        elif cache_mode == 2:
+            save_to_cache_enabled = True
+            read_from_cache_enabled = False
+        elif cache_mode == 3:
+            save_to_cache_enabled = False
+            read_from_cache_enabled = True
+        else:
+            print("Cache mode must be an integer between 0 and 3.\n")
+            usage()
 
     main(mode, structure, True)
