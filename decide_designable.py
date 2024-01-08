@@ -73,15 +73,24 @@ def nussinov(sequence,level:int):
 
     return False
 
-def generate_sequence(g: Graph, v: int) -> list[str]:
 
-    if g.neighborhood_size(v, 1, "out") == 1:
-        return ["AU", "UA", "CG", "GC"]
+def generate_sequence(g: Graph, v: int) -> list[str]:
+    pairs = [("A", "U"), ("U", "A"), ("C", "G"), ("G", "C")]
+    letters = ['A', 'U', 'C', 'G']
 
     outputs = []
+    if g.neighborhood_size(v, 1, "out") == 1:
+        # children dots
+        for letter in letters:
+            output = letter * g.vs[v]["unpaired_count_0"]
+            for pair in pairs:
+                outputs.append(pair[0] + output + pair[1])
+
+        outputs = add_dots(g, v, outputs)
+        return outputs
+
     prev_outputs = [""]
 
-    pairs = [("A", "U"), ("U", "A"), ("C", "G"), ("G", "C")]
     new_prev_outputs = []
     for u in g.neighbors(v, "out"):
         node_outputs = generate_sequence(g, u)
@@ -92,16 +101,56 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
         prev_outputs = new_prev_outputs
 
         new_prev_outputs = []
-    if v == 0:
-        return prev_outputs
+
+
+    if g.vs[v]["is_root"] == True:
+        for output in prev_outputs:
+            if output.count('.') > 0:
+                for letter in letters:
+                    outputs.append(output.replace('.', letter))
+            else:
+                outputs.append(output)
+        return outputs
     for p in pairs:
         for output in prev_outputs:
-            outputs.append(p[0] + output + p[1])
+            if output.count('.') > 0:
+                for letter in letters:
+                    if letter != p[0] and letter != p[1]:
+                        outputs.append(p[0] + output.replace('.', letter) + p[1])
+            else:
+                outputs.append(p[0] + output + p[1])
 
+    outputs = add_dots(g, v, outputs)
     return outputs
+
+
+def add_dots(g: Graph, v: int, prev_outputs: list[str]) -> list[str]:
+    # add dots on the right side and on the left if its first child (index 0)
+    if g.vs[v]["is_root"] != True:
+        parent = g.predecessors(v)[0]
+
+        # find which child is current vertex
+        index = -1
+        if parent == 0:
+            index = 0
+        for n in g.neighbors(parent):
+            if n < v:
+                index += 1
+
+        left_dots = 0
+        if index == 0:
+            left_dots = g.vs[parent]["unpaired_count_0"]
+        right_dots = g.vs[parent].attributes().get(f"unpaired_count_{index + 1}") or 0
+        new_prev_outputs = []
+        for prev_output in prev_outputs:
+            new_prev_outputs.append('.' * left_dots + prev_output + '.' * right_dots)
+        prev_outputs = new_prev_outputs
+
+    return prev_outputs
 
 def check_symmetric(a, tol=1e-8):
     return np.all(np.abs(a-a.T) < tol)
+
 
 def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
     result_list = list(main_string)
@@ -112,6 +161,7 @@ def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
     result_string = ''.join(result_list)
     return result_string
 
+
 def process_sequence(sequence: str) -> bool:
     # function returns true if sequence has only one optimal structure -> structure is designable
 
@@ -121,15 +171,15 @@ def process_sequence(sequence: str) -> bool:
 def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list[int], st_level: int) -> (bool, str):
     # we create possible sequences by adding letters on dot_indexes
     letters = ['A', 'U', 'C', 'G']
-    combinations = list(product(letters, repeat=dot_indexes.__len__()))
+    #combinations = list(product(letters, repeat=dot_indexes.__len__()))
 
     for sequence in rna_sequences:
-        for combination in combinations:
-            memo.clear()
-            whole_sequence = insert_string_at_indexes(sequence, combination, dot_indexes)
-            # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
-            if nussinov(whole_sequence, st_level):
-                return True, whole_sequence
+        # for combination in combinations:
+        memo.clear()
+            # whole_sequence = insert_string_at_indexes(sequence, combination, dot_indexes)
+        # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
+        if nussinov(sequence, st_level):
+            return True, sequence
 
     return False, ""
 
@@ -154,4 +204,5 @@ def decide_designable(St: str) -> (bool, str):
     st_level = St.count('(')
     g = convert_parenthesized_to_tree(St)
     rna_sequences = generate_sequence(g, 0)
+    # print(rna_sequences)
     return check_designable(St, rna_sequences, dot_indexes, st_level)
