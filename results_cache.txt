@@ -8,3 +8,18 @@
 (((((((()))))))) True AAAAAAAAUUUUUUUU
 (((((((((()))))))))) True AAAAAAAAAAUUUUUUUUUU
 ((((((((((((())))))))))))) True AAAAAAAAAAAAAUUUUUUUUUUUUU
+()()() True AUUACG
+()()()() True AUUACGGC
+(()()()) True AAUCGGCU
+(..)(.)(.)(..) True ACCUCUGUGAGAAC
+(..)(.)(..)(.) False 
+(...)(()) True ACCCUUUAA
+((...)(()))(()) True AACCCUCAUGUUUAA
+()((..))() True AUUUCCAACG
+()(..)() True AUUCCACG
+(.)(..)(.) True AGUUCCACAG
+(.)((..))(.) True ACUUUCCAACUG
+(.)(()..)(.) True AGUUUACCACAG
+(.)(..)(().) True AGUUCCACCGAG
+(.)(..())(.) True AGUUCCUAACAG
+(.)(()..)(..) True AGUUUACCACAAG

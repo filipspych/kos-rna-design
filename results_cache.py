@@ -30,7 +30,6 @@ def read_result_from_file(structure: str) -> (bool, str):
                     if line.split(" ")[1].strip() == "True":
                         return (True, line.split(" ")[2].strip())
                     else:
-                        print("deb " +line.split(" ")[1].strip())
                         return (False, "")
     except FileNotFoundError:
         return None

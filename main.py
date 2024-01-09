@@ -12,6 +12,8 @@ save_to_cache_enabled_arg = True
 read_from_cache_enabled_arg = True
 should_print_progress_arg = False
 
+DRAW_UNPAIRED = True
+
 # ================================================================================
 # 4. UI/obsługa plus spięcie tego w całość
 # Na razie UI jest takie, że uruchamiamy program z dwoma argumentami:
@@ -96,7 +98,7 @@ def __mode_1(g: Graph) -> None:
     """
     1 = Display the RNA structure as a graph
     """
-    show_drawing(g, draw_unpaired=False, Sp=structure)
+    show_drawing(g, draw_unpaired=DRAW_UNPAIRED, Sp=structure)
 
 def __mode_2(g: Graph, verbose: bool) -> None:
     """
