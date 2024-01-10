@@ -23,3 +23,5 @@
 (.)(..)(().) True AGUUCCACCGAG
 (.)(..())(.) True AGUUCCUAACAG
 (.)(()..)(..) True AGUUUACCACAAG
+(..)((..))(..) True AGGUUUCCAACAAG
+(.)(.)(.) True ACUUGACUG
