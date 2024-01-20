@@ -197,5 +197,5 @@ def decide_designable(St: str) -> (bool, str):
     st_level = St.count('(')
     g = convert_parenthesized_to_tree(St)
     rna_sequences = generate_sequence(g, 0)
-    print(rna_sequences)
+    #print(rna_sequences)
     return check_designable(St, rna_sequences, dot_indexes, st_level)
