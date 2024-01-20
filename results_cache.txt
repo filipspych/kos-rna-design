@@ -25,3 +25,10 @@
 (.)(()..)(..) True AGUUUACCACAAG
 (..)((..))(..) True AGGUUUCCAACAAG
 (.)(.)(.) True ACUUGACUG
+((..))((..))((.)) True AACCUUUUCCAACACUG
+((.((...((.)))))) True AACAACCCAACUUUUUU
+((...((...((.)))))) True AACCCAACCCAACUUUUUU
+((...((((...))((.)))))) True AACCCAAAACCCUUCACUGUUUU
+(...)(.)(..) True AGGGUUCACAAG
+(...)(..)(()) True ACCCUUCCACAUG
+(...)(..)(.) True ACCCUCUUGUGA
