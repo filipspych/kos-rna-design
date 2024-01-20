@@ -73,7 +73,6 @@ def nussinov(sequence,level:int):
 
     return False
 
-
 def generate_sequence(g: Graph, v: int) -> list[str]:
     pairs = [("A", "U"), ("U", "A"), ("C", "G"), ("G", "C")]
     letters = ['A', 'U', 'C', 'G']
@@ -162,12 +161,6 @@ def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
     return result_string
 
 
-def process_sequence(sequence: str) -> bool:
-    # function returns true if sequence has only one optimal structure -> structure is designable
-
-    raise Exception("nie zaimpelentowano")
-
-
 def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list[int], st_level: int) -> (bool, str):
     # we create possible sequences by adding letters on dot_indexes
     letters = ['A', 'U', 'C', 'G']
@@ -204,5 +197,5 @@ def decide_designable(St: str) -> (bool, str):
     st_level = St.count('(')
     g = convert_parenthesized_to_tree(St)
     rna_sequences = generate_sequence(g, 0)
-    # print(rna_sequences)
+    print(rna_sequences)
     return check_designable(St, rna_sequences, dot_indexes, st_level)
