@@ -13,3 +13,7 @@
 ((((..))((..))((.)))) True AAACAAGUCCAAGGGGACCUU
 (..)(.)(.)(..) True CAAGAGUGUCUCCA
 (..)(.)(..)(.) False 
+...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
+..(..).. True CCACCUCC
+.(.). True CACUC
+...(..)... True CCCACCUCCC
