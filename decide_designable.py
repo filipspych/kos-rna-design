@@ -78,7 +78,7 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
     letters = ['A', 'U', 'C', 'G']
 
     outputs = []
-    if g.neighborhood_size(v, 1, "out") == 1:
+    if g.degree(v, 'out') == 0:
         # children dots
         for letter in letters:
             output = letter * g.vs[v]["unpaired_count_0"]
