@@ -1,6 +1,18 @@
 (..)(..)(..) False 
 (..)(.) True ACCUUCA
 (..)(..) True ACCUUCCA
+(.)(.)(.) True CAGGUCUCA
+(..)((..))(..) True CAAGACAAGUGAAC
+(..)((...))(..) True CAAGACAAAGUGAAC
+(..)((.....))(..) True CAAGACAAAAAGUGAAC
+(...)((...))(...) True CAAAGACAAAGUGAAAC
+(....)((....))(....) True CAAAAGACAAAAGUGAAAAC
+(....)((..((.))..))(....) True CAAAAGACAACCAGGAAGUGAAAAC
+((.((.)))) True AACACAGUUU
+((..((..)).)) True AACCACAAGUCUU
+((((..))((..))((.)))) True AAACAAGUCCAAGGGGACCUU
+(..)(.)(.)(..) True CAAGAGUGUCUCCA
+(..)(.)(..)(.) False 
 ...(...)......(.)..... True AAACAAAGAAAAAAGACAAAAA
 ..(..).. True CCACCUCC
 .(.). True CACUC
