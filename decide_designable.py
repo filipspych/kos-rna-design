@@ -75,31 +75,22 @@ def nussinov(sequence,level:int):
 
 def generate_sequence(g: Graph, v: int) -> list[str]:
     pairs = [("A", "U"), ("U", "A"), ("C", "G"), ("G", "C")]
-    letters = ['A', 'U', 'C', 'G']
-
+    letters = ['C', 'G', 'A', 'U']
     outputs = []
-    if g.degree(v, 'out') == 0:
+    if g.neighborhood_size(v, 1, "out") == 1:
         # children dots
-        for letter in letters:
-            output = letter * g.vs[v]["unpaired_count_0"]
-            for pair in pairs:
-                outputs.append(pair[0] + output + pair[1])
-
+        for i in {0, 2}:
+            for letter in letters[i:i+2]:
+                output = letter * g.vs[v]["unpaired_count_0"]
+                for pair in pairs[i:i+2]:
+                    outputs.append(pair[0] + output + pair[1])
         outputs = add_dots(g, v, outputs)
         return outputs
 
     prev_outputs = [""]
 
-    new_prev_outputs = []
     for u in g.neighbors(v, "out"):
-        node_outputs = generate_sequence(g, u)
-        for prev_output in prev_outputs:
-            for new_output in node_outputs:
-                new_prev_outputs.append(prev_output + new_output)
-
-        prev_outputs = new_prev_outputs
-
-        new_prev_outputs = []
+        prev_outputs = [''.join(pair) for pair in product(prev_outputs, generate_sequence(g, u))]
 
 
     if g.vs[v]["is_root"] == True:
@@ -124,28 +115,21 @@ def generate_sequence(g: Graph, v: int) -> list[str]:
 
 
 def add_dots(g: Graph, v: int, prev_outputs: list[str]) -> list[str]:
-    # add dots on the right side and on the left if its first child (index 0)
-    if g.vs[v]["is_root"] != True:
-        parent = g.predecessors(v)[0]
-
-        # find which child is current vertex
-        index = -1
-        if parent == 0:
-            index = 0
-        for n in g.neighbors(parent):
-            if n < v:
-                index += 1
-
-        left_dots = 0
-        if index == 0:
-            left_dots = g.vs[parent]["unpaired_count_0"]
-        right_dots = g.vs[parent].attributes().get(f"unpaired_count_{index + 1}") or 0
-        new_prev_outputs = []
-        for prev_output in prev_outputs:
-            new_prev_outputs.append('.' * left_dots + prev_output + '.' * right_dots)
-        prev_outputs = new_prev_outputs
-
-    return prev_outputs
+    # jeśli jesteśmy w rootcie (nie mamy rodzica) 
+    # to nie dodajemy żadnych kropek
+    if g.vs[v]["is_root"]:
+        return prev_outputs 
+    else:
+        # indeks rodzica
+        parent = g.predecessors(v)[0] 
+        # którym od lewej dzieckiem rodzica jesteśmy? 
+        # (równoważnie: ile dzieci naszego rodzica ma niższy indeks od nas)
+        index = sum(n < v for n in g.neighbors(parent, mode='out')) 
+        # każde dziecko dodaje kropki po swojej prawej stronie (jeśli jakieś są)
+        right_dots_count = g.vs[parent].attributes().get(f"unpaired_count_{index + 1}") or 0 
+        # pierwsze dziecko od lewej dodaje także krokpki po swojej lewej stronie
+        left_dots_count = g.vs[parent]["unpaired_count_0"] if index == 0 else 0 
+        return [('.' * left_dots_count + po + '.' * right_dots_count) for po in prev_outputs]
 
 def check_symmetric(a, tol=1e-8):
     return np.all(np.abs(a-a.T) < tol)
