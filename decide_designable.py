@@ -94,8 +94,8 @@ def generate_sequence(g: Graph, v: int, should_print_progress: bool) -> list[str
 
     for u in g.neighbors(v, "out"):
         prev_outputs = [''.join(pair) for pair in product(prev_outputs, generate_sequence(g, u, should_print_progress))]
-        print_progress("Generating RNAs", len(prev_outputs), 4**(g.vcount()-1), should_print_progress)
-
+        print_progress("Generating RNAs", len(prev_outputs), 4**(g.vcount()-1)*32, should_print_progress)
+        
     if g.vs[v]["is_root"] == True:
         for output in prev_outputs:
             if output.count('.') > 0:
@@ -103,7 +103,7 @@ def generate_sequence(g: Graph, v: int, should_print_progress: bool) -> list[str
                     outputs.append(output.replace('.', letter))
             else:
                 outputs.append(output)
-            print_progress("Generating RNAs", len(outputs), 4**(g.vcount()-1), should_print_progress)        
+            print_progress("Generating RNAs", len(outputs), 4**(g.vcount()-1)*32, should_print_progress, True)        
         return outputs
     for p in pairs:
         for output in prev_outputs:
@@ -113,8 +113,7 @@ def generate_sequence(g: Graph, v: int, should_print_progress: bool) -> list[str
                         outputs.append(p[0] + output.replace('.', letter) + p[1])
             else:
                 outputs.append(p[0] + output + p[1])
-         print_progress("Generating RNAs", len(prev_outputs), 4**(g.vcount()-1), should_print_progress)
-    print_if("Adding dots...", should_print_progress)    
+        print_progress("Generating RNAs", len(prev_outputs), 4**(g.vcount()-1)*32, should_print_progress, True) 
     outputs = add_dots(g, v, outputs)
     return outputs
 

@@ -47,7 +47,7 @@ def main(mode: int, structure: str, verbose: bool = False, throwOnWrongStructure
     try:
         g = convert_parenthesized_to_tree(structure)
     except ValueError as e:
-        if !throwOnWrongStructure:
+        if not throwOnWrongStructure:
             return False
         print("WRONG STRUCTURE")
         print(str(e))
