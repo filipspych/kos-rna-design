@@ -21,7 +21,7 @@ read_from_cache_enabled = True
 #   python3 prog.py 2 "((.(..(..).....))).."
 #   Tutaj '2' to tryb działania programu, a "((.(..(..).....))).." to struktura RNA do analizy.
 
-def main(mode: int, structure: str, verbose: bool = False, onlyResult: bool = False) -> (bool, str) or None:
+def main(mode: int, structure: str, verbose: bool = False, throwOnWrongStructure: bool = True) -> (bool, str) or None:
     """
     Główna funkcja obsługująca logikę programu.
     
@@ -44,7 +44,7 @@ def main(mode: int, structure: str, verbose: bool = False, onlyResult: bool = Fa
     try:
         g = convert_parenthesized_to_tree(structure)
     except ValueError as e:
-        if onlyResult:
+        if !throwOnWrongStructure:
             return False
         print("WRONG STRUCTURE")
         print(str(e))
