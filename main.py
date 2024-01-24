@@ -8,8 +8,11 @@ from show_drawing import show_drawing
 from utils import is_structure_with_known_ND_motifs, print_if
 from results_cache import save_result_to_file, read_result_from_file, RESULTS_CACHE_PATH
 
-save_to_cache_enabled = True
-read_from_cache_enabled = True
+save_to_cache_enabled_arg = True
+read_from_cache_enabled_arg = True
+should_print_progress_arg = False
+
+DRAW_UNPAIRED = True
 
 # ================================================================================
 # 4. UI/obsługa plus spięcie tego w całość
@@ -44,7 +47,7 @@ def main(mode: int, structure: str, verbose: bool = False, throwOnWrongStructure
     try:
         g = convert_parenthesized_to_tree(structure)
     except ValueError as e:
-        if !throwOnWrongStructure:
+        if not throwOnWrongStructure:
             return False
         print("WRONG STRUCTURE")
         print(str(e))
@@ -76,7 +79,7 @@ def __mode_0(g: Graph, structure: str, verbose: bool) -> (bool, str):
         return False
     
 
-    if read_from_cache_enabled:
+    if read_from_cache_enabled_arg:
         result = read_result_from_file(structure)
         if result is not None:
             is_designable, rna_str = result
@@ -87,9 +90,9 @@ def __mode_0(g: Graph, structure: str, verbose: bool) -> (bool, str):
                 print_if("ND", verbose)
             return result[0]
 
-    designable, rna_str = decide_designable(structure)
+    designable, rna_str = decide_designable(structure, should_print_progress_arg)
     print_if(f"D\n{rna_str}" if designable else "ND", verbose)
-    if save_to_cache_enabled:
+    if save_to_cache_enabled_arg:
         save_result_to_file(designable, structure, rna_str)
     return designable
 
@@ -97,7 +100,7 @@ def __mode_1(g: Graph) -> None:
     """
     1 = Display the RNA structure as a graph
     """
-    show_drawing(g, draw_unpaired=False, Sp=structure)
+    show_drawing(g, draw_unpaired=DRAW_UNPAIRED, Sp=structure)
 
 def __mode_2(g: Graph, verbose: bool) -> None:
     """
@@ -122,7 +125,7 @@ def __mode_4(g: Graph, verbose) -> None:
         __mode_1(g)
 
 def usage():
-    print("Usage: python3 main.py <mode> '<structure>' <cache_mode>")
+    print("Usage: python3 main.py <mode> '<structure>' <cache_mode> <print_progress>")
     print("       <mode> should be an integer between 0 and 4, where:")
     print("       0 = Decide if the structure is designable. Will print exactly one or exactly two lines. First line: 'D' for designable, 'ND' for not designable, 'WRONG STRUCTURE' if the structure is incorrect. Second line: details if available.")
     print("       1 = Display the RNA structure as a graph")
@@ -131,10 +134,11 @@ def usage():
     print("       4 = Check if the RNA structure is designable and display it if it is not")
     print("       <structure> is the parenthesized representation of the RNA structure to analyze.")
     print("       <cache_mode> (default: 1). 0: cache disabled; 1: read and write; 2: write only; 3: read only. The cache file is at " + RESULTS_CACHE_PATH + ".")
+    print("       <print_progress> (default: 0). 0: do not print progress; 1: print progress.")
     sys.exit(1)
 
 if __name__ == "__main__":
-    if not 3 <= len(sys.argv) <= 4:
+    if not 3 <= len(sys.argv) <= 5:
         usage()
     mode = int(sys.argv[1])
     if mode < 0 or mode > 4:
@@ -144,23 +148,25 @@ if __name__ == "__main__":
     if any(char not in ".()" for char in structure):
         print("Structure must be a string containing only '.' and '(', ')'.\n")
         usage()
-    if len(sys.argv) == 4:
+    if len(sys.argv) >= 4:
         #0: cache disabled; 1: read and write; 2: write only; 3: read only
         cache_mode = int(sys.argv[3])
         if cache_mode == 0:
-            save_to_cache_enabled = False
-            read_from_cache_enabled = False
+            save_to_cache_enabled_arg = False
+            read_from_cache_enabled_arg = False
         elif cache_mode == 1:
-            save_to_cache_enabled = True
-            read_from_cache_enabled = True
+            save_to_cache_enabled_arg = True
+            read_from_cache_enabled_arg = True
         elif cache_mode == 2:
-            save_to_cache_enabled = True
-            read_from_cache_enabled = False
+            save_to_cache_enabled_arg = True
+            read_from_cache_enabled_arg = False
         elif cache_mode == 3:
-            save_to_cache_enabled = False
-            read_from_cache_enabled = True
+            save_to_cache_enabled_arg = False
+            read_from_cache_enabled_arg = True
         else:
             print("Cache mode must be an integer between 0 and 3.\n")
             usage()
+    if len(sys.argv) == 5:
+        should_print_progress_arg = bool(int(sys.argv[4]))
 
     main(mode, structure, True)
