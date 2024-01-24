@@ -77,36 +77,68 @@ def nussinov(sequence,level:int):
     return False
 
 def generate_sequence(g: Graph, v: int, should_print_progress: bool) -> list[str]:
-
-    if g.neighborhood_size(v, 1, "out") == 1:
-        return ["AU", "UA", "CG", "GC"]
-
+    pairs = [("A", "U"), ("U", "A"), ("C", "G"), ("G", "C")]
+    letters = ['C', 'G', 'A', 'U']
     outputs = []
+    if g.neighborhood_size(v, 1, "out") == 1:
+        # children dots
+        for i in {0, 2}:
+            for letter in letters[i:i+2]:
+                output = letter * g.vs[v]["unpaired_count_0"]
+                for pair in pairs[i:i+2]:
+                    outputs.append(pair[0] + output + pair[1])
+        outputs = add_dots(g, v, outputs)
+        return outputs
+
     prev_outputs = [""]
 
-    pairs = [("A", "U"), ("U", "A"), ("C", "G"), ("G", "C")]
-    new_prev_outputs = []
     for u in g.neighbors(v, "out"):
-        node_outputs = generate_sequence(g, u, should_print_progress)
-        for prev_output in prev_outputs:
-            for new_output in node_outputs:
-                new_prev_outputs.append(prev_output + new_output)
-
-        prev_outputs = new_prev_outputs
-
-        new_prev_outputs = []
-    if v == 0:
+        prev_outputs = [''.join(pair) for pair in product(prev_outputs, generate_sequence(g, u, should_print_progress))]
         print_progress("Generating RNAs", len(prev_outputs), 4**(g.vcount()-1), should_print_progress)
-        return prev_outputs
+
+    if g.vs[v]["is_root"] == True:
+        for output in prev_outputs:
+            if output.count('.') > 0:
+                for letter in letters:
+                    outputs.append(output.replace('.', letter))
+            else:
+                outputs.append(output)
+            print_progress("Generating RNAs", len(outputs), 4**(g.vcount()-1), should_print_progress)        
+        return outputs
     for p in pairs:
         for output in prev_outputs:
-            outputs.append(p[0] + output + p[1])
-
-    print_progress("Generating RNAs", len(outputs), 4**(g.vcount()-1), should_print_progress)
+            if output.count('.') > 0:
+                for letter in letters:
+                    if letter != p[0] and letter != p[1]:
+                        outputs.append(p[0] + output.replace('.', letter) + p[1])
+            else:
+                outputs.append(p[0] + output + p[1])
+         print_progress("Generating RNAs", len(prev_outputs), 4**(g.vcount()-1), should_print_progress)
+    print_if("Adding dots...", should_print_progress)    
+    outputs = add_dots(g, v, outputs)
     return outputs
+
+
+def add_dots(g: Graph, v: int, prev_outputs: list[str]) -> list[str]:
+    # jeśli jesteśmy w rootcie (nie mamy rodzica) 
+    # to nie dodajemy żadnych kropek
+    if g.vs[v]["is_root"]:
+        return prev_outputs 
+    else:
+        # indeks rodzica
+        parent = g.predecessors(v)[0] 
+        # którym od lewej dzieckiem rodzica jesteśmy? 
+        # (równoważnie: ile dzieci naszego rodzica ma niższy indeks od nas)
+        index = sum(n < v for n in g.neighbors(parent, mode='out')) 
+        # każde dziecko dodaje kropki po swojej prawej stronie (jeśli jakieś są)
+        right_dots_count = g.vs[parent].attributes().get(f"unpaired_count_{index + 1}") or 0 
+        # pierwsze dziecko od lewej dodaje także krokpki po swojej lewej stronie
+        left_dots_count = g.vs[parent]["unpaired_count_0"] if index == 0 else 0 
+        return [('.' * left_dots_count + po + '.' * right_dots_count) for po in prev_outputs]
 
 def check_symmetric(a, tol=1e-8):
     return np.all(np.abs(a-a.T) < tol)
+
 
 def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
     result_list = list(main_string)
@@ -117,21 +149,19 @@ def insert_string_at_indexes(main_string, insert_string, indexes) -> str:
     result_string = ''.join(result_list)
     return result_string
 
-def check_designable(structure: str, rna_sequences: list[str], dot_indexes: list[int], st_level: int, should_print_progress: bool) -> (bool, str):
+def check_designable(structure: str, rna_sequences: list[str], st_level: int, should_print_progress: bool) -> (bool, str):
     # we create possible sequences by adding letters on dot_indexes
     letters = ['A', 'U', 'C', 'G']
-    print_if(f"[{datetime.datetime.now()}] Generating combinations for unpaired bases...", should_print_progress)
-    combinations = list(product(letters, repeat=dot_indexes.__len__()))
-
+    #combinations = list(product(letters, repeat=dot_indexes.__len__()))
     print_if(f"\nRNAs checking started at {datetime.datetime.now()}\n", should_print_progress)
     s_idx: int = 0
     for sequence in rna_sequences:
-        for combination in combinations:
-            memo.clear()
-            whole_sequence = insert_string_at_indexes(sequence, combination, dot_indexes)
-            # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
-            if nussinov(whole_sequence, st_level):
-                return True, whole_sequence
+        # for combination in combinations:
+        memo.clear()
+            # whole_sequence = insert_string_at_indexes(sequence, combination, dot_indexes)
+        # teraz chcemy sprawdzic czy dla tego ciagu rna istenieje tylko jedna struktura optymalna
+        if nussinov(sequence, st_level):
+            return True, sequence
         print_progress("Checking RNAs", s_idx, len(rna_sequences), should_print_progress, should_print_in_one_line=True)
         s_idx+=1
 
@@ -159,4 +189,4 @@ def decide_designable(St: str, should_print_progress: bool) -> (bool, str):
     g = convert_parenthesized_to_tree(St)
     rna_sequences = generate_sequence(g, 0, should_print_progress)
     print_if("", should_print_progress)
-    return check_designable(St, rna_sequences, dot_indexes, st_level, should_print_progress)
+    return check_designable(St, rna_sequences, st_level, should_print_progress)
