@@ -28,9 +28,8 @@ def create_structures_with_less_nestings(structure: str) -> [str]:
         # create structure for this graph
         current_str = convert_tree_to_parenthesized(g)
         new_structures.append(current_str)
-        print(current_str)
 
-        # move children of end to child of start
+    return new_structures
 
 
 def find_stars_and_ends_of_nestings(g: Graph) -> [(int, int)]:
@@ -78,5 +77,5 @@ def create_structures_from_file(file_path: str) -> None:
         for line in lines:
             structures = create_structures_with_less_nestings(line)
             for structure in structures:
-                output_file.write(f"{line},{structure}\n")
+                output_file.write(f"{line} {structure}\n")
     return
