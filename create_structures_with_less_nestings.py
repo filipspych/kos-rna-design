@@ -71,7 +71,7 @@ def create_structures_from_file(file_path: str) -> None:
 
     lines = [line.strip() for line in lines]
 
-    output_file_path = "structures.txt"
+    output_file_path = "DO_POROWNANIA.txt"
 
     with open(output_file_path, 'w') as output_file:
         for line in lines:
@@ -79,3 +79,7 @@ def create_structures_from_file(file_path: str) -> None:
             for structure in structures:
                 output_file.write(f"{line} {structure}\n")
     return
+
+
+if __name__ == "__main__":
+    create_structures_from_file("PROJEKTOWALNE.txt")
