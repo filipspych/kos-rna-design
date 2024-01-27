@@ -10,7 +10,6 @@ def create_structures_with_less_nestings(structure: str) -> [str]:
     pairs = find_stars_and_ends_of_nestings(graph)
 
     new_structures = []
-
     # for each pair we want to generate new graph which
 
     for pair in pairs:
@@ -53,6 +52,7 @@ def find_stars_and_ends_of_nestings(g: Graph) -> [(int, int)]:
             else:
                 if count >= 3:
                     pairs.append((start, v))
+                count = 0
         else:
             if g.degree(v, "out") == 1 and g.vs[v]["unpaired_count_0"] == 0 and g.vs[v]["unpaired_count_1"] == 0:
                 count = 1
@@ -75,6 +75,7 @@ def create_structures_from_file(file_path: str) -> None:
 
     with open(output_file_path, 'w') as output_file:
         for line in lines:
+            print(line)
             structures = create_structures_with_less_nestings(line)
             for structure in structures:
                 output_file.write(f"{line} {structure}\n")
@@ -83,3 +84,4 @@ def create_structures_from_file(file_path: str) -> None:
 
 if __name__ == "__main__":
     create_structures_from_file("PROJEKTOWALNE.txt")
+
